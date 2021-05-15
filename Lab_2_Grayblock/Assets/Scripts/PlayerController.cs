@@ -6,13 +6,18 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 1.0f;
     public float temp;
+    public GameObject bulletSpawnPoint;
+    public GameObject bulletPrefab;
 
     private Vector3 offset = new Vector3(0.0f, 15.0f, -2.0f);
     private Rigidbody playerRb;
     private Animator playerAnim;
     private Camera mainCam;
     private GameObject crossHair;
-    
+
+    private float fireRate = 0.5f;
+    private float fireRateDetect = 0.5f;
+    private bool fireReady = true;
 
     public int Ammo;
     // Start is called before the first frame update
@@ -44,8 +49,9 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButton(1))
         {
             playerAnim.SetInteger("WeaponType_int", 1);
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && fireReady)
             {
+                fireReady = false;
                 StartCoroutine(shoot());
             }
         }
@@ -53,7 +59,6 @@ public class PlayerController : MonoBehaviour
         {
             playerAnim.SetInteger("WeaponType_int", 0);
         }
-        
         transform.Translate(Vector3.forward * verticalInput * Time.deltaTime * moveSpeed , Space.World);
         transform.Translate(Vector3.right * horizontalInput * Time.deltaTime * moveSpeed, Space.World);
 
@@ -83,6 +88,9 @@ public class PlayerController : MonoBehaviour
     {
         playerAnim.SetBool("Shoot_b", true);
         yield return new WaitForSeconds(0.3f);
+        Instantiate(bulletPrefab, bulletSpawnPoint.transform.position, transform.rotation);
+        --Ammo;
+        fireReady = true;
         playerAnim.SetBool("Shoot_b", false);
     }
 
